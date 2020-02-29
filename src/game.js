@@ -62,9 +62,6 @@ function gameCreate() {
     graphics.endFill();
   }
 
-  let PTM = 70;
-
-
 
   // Make the john body
   johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
@@ -96,10 +93,6 @@ function gameCreate() {
   wheelBodies[0].setCircle(0.3 * PTM);
   wheelBodies[1].setCircle(0.3 * PTM);
 
-  let frequency = 3.5;
-  let damping = 0.5;
-  let motorTorque = 4;
-  let rideHeight = 0.25;
 
   // Make wheel joints
   // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled

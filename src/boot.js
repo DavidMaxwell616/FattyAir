@@ -21,6 +21,13 @@ let shrooms;
 let weed;
 let snowball;
 let warning;
+let frequency = 3.5;
+let damping = 0.5;
+let motorTorque = 4;
+let rideHeight = 0.25;
+
+const PTM = 70;
+
 
 let wheelBodies = [];
 
