@@ -9,10 +9,7 @@ function preload() {
   game.load.image('john', 'assets/images/john.png');
   game.load.image('upperjohn', 'assets/images/upperjohn.png');
   game.load.image('lowerjohn', 'assets/images/lowerjohn.png');
-  game.load.image('powerup1', 'assets/images/powerup1.png');
-  game.load.image('powerup2', 'assets/images/powerup2.png');
-  game.load.image('powerup3', 'assets/images/powerup3.png');
-  game.load.image('powerup4', 'assets/images/powerup4.png');
+  game.load.spritesheet('powerups', 'assets/images/powerups.png', 91, 91);
   game.load.image('snowball', 'assets/images/snowball.png');
   game.load.image('whiskey', 'assets/images/whiskey.png');
   game.load.image('shrooms', 'assets/images/shrooms.png');

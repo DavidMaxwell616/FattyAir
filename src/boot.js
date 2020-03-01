@@ -12,10 +12,7 @@ const worldHeight = 640;
 let isJumping = false;
 let bonusCount = 0;
 let vertices = [];
-let powerup1;
-let powerup2;
-let powerup3;
-let powerup4;
+let powerups;
 let whiskey;
 let shrooms;
 let weed;
@@ -31,18 +28,25 @@ const PTM = 70;
 
 let wheelBodies = [];
 
-let johnVertices = [
-  -30, -15,
-  -55, 2,
-  -43, 14,
+const lowerJohnVertices = [
+  -30, -30,
+  -105, 2,
+  -103, 14,
   54, 15,
   65, 3,
-  79, 3,
-  34, -15,
-  11, -100,
-  -5, -100
+  0, -30,
 ];
 
+const upperJohnVertices = [
+  -20, -15,
+  -20, -80,
+  -8, -115,
+  11, -115,
+  22, -55,
+  14, -15,
+]
+
 let johnBody;
+let johnLegs;
 let driveJoints = [];
 let upperjohn;

@@ -11,7 +11,7 @@ function create() {
 
 function gameCreate() {
   game.world.setBounds(0, 0, worldWidth, worldHeight);
-
+  powerups = game.add.group();
   game.stage.backgroundColor = '#124184';
 
   // Enable Box2D physics
@@ -27,19 +27,11 @@ function gameCreate() {
     game.height / 2,
     0,
   );
-  powerup1 = game.add.image(0, 0, 'powerup1');
-  powerup2 = game.add.image(0, 0, 'powerup2');
-  powerup3 = game.add.image(0, 0, 'powerup3');
-  powerup4 = game.add.image(0, 0, 'powerup4');
   whiskey = game.add.image(0, 0, 'whiskey');
   shrooms = game.add.image(0, 0, 'shrooms');
   weed = game.add.image(0, 0, 'weed');
   snowball = game.add.image(0, 0, 'snowball');
   warning = game.add.image(0, 0, 'warning');
-  powerup1.visible = false;
-  powerup2.visible = false;
-  powerup3.visible = false;
-  powerup4.visible = false;
   whiskey.visible = false;
   shrooms.visible = false;
   weed.visible = false;
@@ -64,42 +56,45 @@ function gameCreate() {
 
 
   // Make the john body
-  johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
-  johnBody.setPolygon(johnVertices);
-  upperjohn = game.add.sprite(0, 0, 'upperjohn');
-  johnBody.sprite = upperjohn;
+  johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
+  johnLegs.setPolygon(lowerJohnVertices);
   lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
   lowerjohn.visible = true;
   lowerjohn.anchor.setTo(0.6, 0.5);
-  upperjohn.body = johnBody;
+  lowerjohn.body = johnLegs;
+  johnLegs.sprite = lowerjohn;
+
+  johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
+  johnBody.setPolygon(upperJohnVertices);
+  upperjohn = game.add.sprite(0, 0, 'upperjohn');
+  johnBody.sprite = upperjohn;
   upperjohn.visible = true;
   upperjohn.anchor.setTo(0.5, 1.2);
+  upperjohn.body = johnBody;
 
-  upperjohn.body.setBodyContactCallback(groundBody, groundCallback, this);
-
+  game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 3, 0.5);
+  lowerjohn.body.setBodyContactCallback(groundBody, groundCallback, this);
+  // Make wheel joints
+  // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled
   // Make the wheel bodies
   wheelBodies[0] = new Phaser.Physics.Box2D.Body(
     game,
     null,
-    -0.82 * PTM,
+    -1.3 * PTM,
     0.6 * -PTM,
   );
   wheelBodies[1] = new Phaser.Physics.Box2D.Body(
     game,
     null,
-    1.05 * PTM,
+    1.15 * PTM,
     0.6 * -PTM,
   );
   wheelBodies[0].setCircle(0.3 * PTM);
   wheelBodies[1].setCircle(0.3 * PTM);
-
-
-  // Make wheel joints
-  // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled
   driveJoints[0] = game.physics.box2d.wheelJoint(
-    johnBody,
+    johnLegs,
     wheelBodies[0],
-    -0.82 * PTM,
+    -1.2 * PTM,
     rideHeight * PTM,
     0,
     0,
@@ -112,7 +107,7 @@ function gameCreate() {
     true,
   ); // rear
   driveJoints[1] = game.physics.box2d.wheelJoint(
-    johnBody,
+    johnLegs,
     wheelBodies[1],
     1.05 * PTM,
     rideHeight * PTM,
@@ -147,6 +142,7 @@ function gameCreate() {
   livesCaption.fixedToCamera = true;
   background.fixedToCamera = true;
   game.camera.follow(johnBody);
+
 }
 
 function groundCallback() {
@@ -234,22 +230,9 @@ function buildLevel() {
       // ground[tnm].objs[_l4].gotoAndStop(Math.floor(Math.random() * 8) + 1);
       // _l5++;
       const bonusType = game.rnd.integerInRange(1, 4);
-      switch (bonusType) {
-        case 1:
-          powerup1.reset(_l2, _l1 + 220);
-          break;
-        case 2:
-          powerup2.reset(_l2, _l1 + 220);
-          break;
-        case 3:
-          powerup3.reset(_l2, _l1 + 220);
-          break;
-        case 4:
-          powerup4.reset(_l2, _l1 + 220);
-          break;
-        default:
-          break;
-      }
+      powerups.add(game.add.sprite((_l2, _l1 + 220, 'powerups')));
+      powerups.frame = bonusType;
+      //  lowerjohn.body.setBodyContactCallback(powerup1, callPowerup, this);
     } // end if
     if (_l11 % 45 == 20) {
       //      _l4 = "drop" + bonusCount;
@@ -270,25 +253,22 @@ function buildLevel() {
   lastGet = 0;
 }
 
+function callPowerup(object) {}
+
 function update() {
   if (!startGame) {
     mainMenuUpdate();
     return;
   }
-  let motorSpeed = 50; // rad/s
-  let motorEnabled = true;
-
   lowerjohn.x = driveJoints[1].x;
   lowerjohn.y = driveJoints[1].y;
-
-  if (johnBody.y > game.world.height) {
-    johnBody.x = 60;
-    johnBody.y = 200;
+  let motorSpeed = 50; // rad/s
+  let motorEnabled = true;
+  if (johnBody.x < 50)
     johnBody.velocity.x = 0;
-    johnBody.velocity.y = 0;
-    motorSpeed = 0;
+  if (johnBody.y > game.world.height) {
+    restartLevel();
   }
-
   if (game.cursors.down.isDown) {
     motorSpeed = 0;
   } // prioritize braking
@@ -308,10 +288,19 @@ function update() {
   }
 }
 
+function restartLevel() {
+  johnBody.x = 60;
+  johnBody.y = 200;
+  johnBody.velocity.x = 0;
+  johnBody.velocity.y = 0;
+  motorSpeed = 0;
+  isJumping = true;
+}
+
 function render() {
   if (!startGame) {
     mainMenuUpdate();
     return;
   }
-  //game.debug.box2dWorld();
+  game.debug.box2dWorld();
 }

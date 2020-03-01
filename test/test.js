@@ -17,19 +17,24 @@ const worldBottom = 20000;
 var level = 1;
 var vertices = [];
 let wheelBodies = [];
-let johnVertices = [
-  -30, -15,
-  -55, 2,
-  -43, 14,
+const lowerJohnVertices = [
+  -30, -30,
+  -105, 2,
+  -103, 14,
   54, 15,
   65, 3,
-  79, 3,
-  34, -15,
-  11, -100,
-  -5, -100
+  0, -30,
 ];
 
+const upperJohnVertices = [
+  -30, -15,
+  -5, -100,
+  11, -100,
+  34, -15,
+]
+
 let johnBody;
+let johnLegs;
 let driveJoints = [];
 let upperjohn;
 
@@ -45,6 +50,7 @@ function create() {
   game.physics.box2d.gravity.y = 500;
   game.physics.box2d.friction = 0.8;
   game.stage.backgroundColor = '#124184';
+  //BUILD GROUND
   let groundBody = new Phaser.Physics.Box2D.Body(
 
     game,
@@ -55,17 +61,25 @@ function create() {
   );
   buildLevel();
   groundBody.setChain(vertices);
+
+  //BUILD JOHN
+  johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
+  johnLegs.setPolygon(lowerJohnVertices);
+  lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
+  lowerjohn.visible = true;
+  lowerjohn.anchor.setTo(0.6, 0.5);
+  lowerjohn.body = johnLegs;
+  johnLegs.sprite = lowerjohn;
+
   johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
-  johnBody.setPolygon(johnVertices);
+  johnBody.setPolygon(upperJohnVertices);
   upperjohn = game.add.sprite(0, 0, 'upperjohn');
   johnBody.sprite = upperjohn;
-  lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
-  lowerjohn.visible = false;
-  lowerjohn.anchor.setTo(0.6, 0.5);
-  upperjohn.body = johnBody;
-  upperjohn.visible = false;
+  upperjohn.visible = true;
   upperjohn.anchor.setTo(0.5, 1.2);
+  upperjohn.body = johnBody;
 
+  game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 3, 0.5);
   upperjohn.body.setBodyContactCallback(groundBody, groundCallback, this);
   // Make wheel joints
   // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled
@@ -73,21 +87,21 @@ function create() {
   wheelBodies[0] = new Phaser.Physics.Box2D.Body(
     game,
     null,
-    -0.82 * PTM,
+    -1.3 * PTM,
     0.6 * -PTM,
   );
   wheelBodies[1] = new Phaser.Physics.Box2D.Body(
     game,
     null,
-    1.05 * PTM,
+    1.15 * PTM,
     0.6 * -PTM,
   );
   wheelBodies[0].setCircle(0.3 * PTM);
   wheelBodies[1].setCircle(0.3 * PTM);
   driveJoints[0] = game.physics.box2d.wheelJoint(
-    johnBody,
+    johnLegs,
     wheelBodies[0],
-    -0.82 * PTM,
+    -1.2 * PTM,
     rideHeight * PTM,
     0,
     0,
@@ -100,7 +114,7 @@ function create() {
     true,
   ); // rear
   driveJoints[1] = game.physics.box2d.wheelJoint(
-    johnBody,
+    johnLegs,
     wheelBodies[1],
     1.05 * PTM,
     rideHeight * PTM,
