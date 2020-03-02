@@ -9,7 +9,7 @@ let levelCaption;
 let livesCaption;
 const worldWidth = 15100;
 const worldHeight = 640;
-let isJumping = false;
+let isJumping = true;
 let bonusCount = 0;
 let vertices = [];
 let powerups;
@@ -22,7 +22,7 @@ let frequency = 3.5;
 let damping = 0.5;
 let motorTorque = 4;
 let rideHeight = 0.25;
-
+let rewards = [];
 const PTM = 70;
 
 

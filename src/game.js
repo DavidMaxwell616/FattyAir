@@ -12,6 +12,8 @@ function create() {
 function gameCreate() {
   game.world.setBounds(0, 0, worldWidth, worldHeight);
   powerups = game.add.group();
+  powerups.enableBody = true;
+  powerups.physicsBodyType = Phaser.Physics.BOX2D;
   game.stage.backgroundColor = '#124184';
 
   // Enable Box2D physics
@@ -42,13 +44,14 @@ function gameCreate() {
 
   groundBody.setChain(vertices);
   let graphics = game.add.graphics(0, 0);
+  game.physics.box2d.enable(groundBody, true);
 
   for (let index = 0; index < vertices.length - 2; index += 2) {
     graphics.beginFill(0xeeeeee);
     graphics.lineStyle(1, 0xeeeeee, 1);
     graphics.moveTo(vertices[index], game.height / 2 + vertices[index + 1]);
-    graphics.lineTo(vertices[index], game.height);
-    graphics.lineTo(vertices[index + 2], game.height);
+    graphics.lineTo(vertices[index], game.height + 100);
+    graphics.lineTo(vertices[index + 2], game.height + 100);
     graphics.lineTo(vertices[index + 2], game.height / 2 + vertices[index + 3]);
     graphics.lineTo(vertices[index], game.height / 2 + vertices[index + 1]);
     graphics.endFill();
@@ -73,7 +76,6 @@ function gameCreate() {
   upperjohn.body = johnBody;
 
   game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 3, 0.5);
-  lowerjohn.body.setBodyContactCallback(groundBody, groundCallback, this);
   // Make wheel joints
   // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled
   // Make the wheel bodies
@@ -121,6 +123,8 @@ function gameCreate() {
     motorTorque,
     true,
   ); // front
+  wheelBodies[1].setCategoryContactCallback(2, callPowerup, this);
+  //wheelBodies[0].setBodyContactCallback(powerups, groundCallback, this);
 
   game.cursors = game.input.keyboard.createCursorKeys();
   game.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -146,6 +150,7 @@ function gameCreate() {
 }
 
 function groundCallback() {
+  console.log('hi ground');
   isJumping = false;
 }
 
@@ -218,7 +223,7 @@ function buildLevel() {
     //   flagh = _l1;
     // } // end if
     if (
-      Math.random() < level * 0.025 &&
+      Math.random() < level * 0.75 &&
       _l8 > -0.1 &&
       _l2 > 500 &&
       _l2 < 14000
@@ -230,9 +235,11 @@ function buildLevel() {
       // ground[tnm].objs[_l4].gotoAndStop(Math.floor(Math.random() * 8) + 1);
       // _l5++;
       const bonusType = game.rnd.integerInRange(1, 4);
-      powerups.add(game.add.sprite((_l2, _l1 + 220, 'powerups')));
-      powerups.frame = bonusType;
-      //  lowerjohn.body.setBodyContactCallback(powerup1, callPowerup, this);
+      var powerup = powerups.create(_l2, _l1 + 220, 'powerups');
+      powerup.frame = bonusType;
+      powerup.body.setCollisionCategory(2); // this is a bitmask
+      //powerup.body.sensor = true;
+      game.world.bringToTop(powerups);
     } // end if
     if (_l11 % 45 == 20) {
       //      _l4 = "drop" + bonusCount;
@@ -253,7 +260,11 @@ function buildLevel() {
   lastGet = 0;
 }
 
-function callPowerup(object) {}
+function callPowerup(wheel, powerup) {
+  console.log(powerup);
+  powerup.visible = false;
+  powerup.destroy();
+}
 
 function update() {
   if (!startGame) {
@@ -264,6 +275,7 @@ function update() {
   lowerjohn.y = driveJoints[1].y;
   let motorSpeed = 50; // rad/s
   let motorEnabled = true;
+  console.log(isJumping);
   if (johnBody.x < 50)
     johnBody.velocity.x = 0;
   if (johnBody.y > game.world.height) {
@@ -277,7 +289,7 @@ function update() {
   } else if (game.cursors.right.isDown && !game.cursors.left.isDown) {} else {
     motorEnabled = false;
   } // roll if no keys pressed
-  if (game.spaceKey.isDown && !isJumping) {
+  if (game.spaceKey.isDown) {
     isJumping = true;
     johnBody.velocity.y = -200;
   }

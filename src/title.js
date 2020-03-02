@@ -2,10 +2,13 @@ function mainMenuCreate() {
   background = game.add.image(0, 0, 'background');
   background.height = game.height;
 
+  title2 = game.add.image(game.world.centerX - 5, game.world.centerY + 5, 'title');
 
+  title2.anchor.setTo(0.5, 0.5);
+  title2.visible = true;
+  title2.tint = Math.random() * 0xffffff;
   title = game.add.image(game.world.centerX, game.world.centerY, 'title');
-  title.width = game.width / 2;
-  title.height = game.height / 2;
+
   title.anchor.setTo(0.5, 0.5);
   title.visible = true;
   maxxdaddy = game.add.image(0, game.height * 0.95, 'maxxdaddy');
@@ -18,6 +21,7 @@ function mainMenuUpdate() {
   if (game.spaceKey.isDown) {
     game.spaceKey = null;
     title.visible = false;
+    title2.visible = false;
     gameCreate();
     startGame = true;
   }
