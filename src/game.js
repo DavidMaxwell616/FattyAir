@@ -123,8 +123,11 @@ function gameCreate() {
     motorTorque,
     true,
   ); // front
-  wheelBodies[1].setCategoryContactCallback(2, callPowerup, this);
-  //wheelBodies[0].setBodyContactCallback(powerups, groundCallback, this);
+  groundBody.setCollisionCategory(1);
+  wheelBodies[1].setCollisionCategory(1);
+
+  wheelBodies[1].setCategoryContactCallback(1, groundCallback);
+  wheelBodies[1].setCategoryContactCallback(2, callPowerup);
 
   game.cursors = game.input.keyboard.createCursorKeys();
   game.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -150,7 +153,6 @@ function gameCreate() {
 }
 
 function groundCallback() {
-  console.log('hi ground');
   isJumping = false;
 }
 
@@ -223,7 +225,7 @@ function buildLevel() {
     //   flagh = _l1;
     // } // end if
     if (
-      Math.random() < level * 0.75 &&
+      Math.random() < level * 0.025 &&
       _l8 > -0.1 &&
       _l2 > 500 &&
       _l2 < 14000
@@ -275,7 +277,6 @@ function update() {
   lowerjohn.y = driveJoints[1].y;
   let motorSpeed = 50; // rad/s
   let motorEnabled = true;
-  console.log(isJumping);
   if (johnBody.x < 50)
     johnBody.velocity.x = 0;
   if (johnBody.y > game.world.height) {
