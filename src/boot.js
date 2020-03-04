@@ -12,7 +12,7 @@ const worldHeight = 640;
 let isJumping = true;
 let bonusCount = 0;
 let vertices = [];
-let powerups;
+let powerups=[];
 let whiskey;
 let shrooms;
 let weed;
@@ -45,6 +45,13 @@ const upperJohnVertices = [
   22, -55,
   14, -15,
 ]
+
+const powerupScores = {
+  1:100,
+  2:250,
+  3:500,
+  4:1000
+};
 
 let johnBody;
 let johnLegs;

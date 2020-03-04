@@ -11,9 +11,6 @@ function create() {
 
 function gameCreate() {
   game.world.setBounds(0, 0, worldWidth, worldHeight);
-  powerups = game.add.group();
-  powerups.enableBody = true;
-  powerups.physicsBodyType = Phaser.Physics.BOX2D;
   game.stage.backgroundColor = '#124184';
 
   // Enable Box2D physics
@@ -22,21 +19,32 @@ function gameCreate() {
   game.physics.box2d.friction = 0.8;
 
   // Make the ground body
-  let groundBody = new Phaser.Physics.Box2D.Body(
+  groundBody = new Phaser.Physics.Box2D.Body(
     game,
     null,
     0,
     game.height / 2,
     0,
   );
-  whiskey = game.add.image(0, 0, 'whiskey');
-  shrooms = game.add.image(0, 0, 'shrooms');
-  weed = game.add.image(0, 0, 'weed');
-  snowball = game.add.image(0, 0, 'snowball');
+  bonus = game.add.sprite(0, 0, 'bonus');
+  snowball = new Phaser.Physics.Box2D.Body(
+    game,
+    null,
+    0,
+    0,
+    0,
+  );
+
+  snowball.setCircle(39);
+  var sb = game.add.sprite(0, 0, 'snowball');
+  snowball.sprite = sb;
+  sb.body = snowball;
+  sb.anchor.setTo(0.5, 0.5);
+  snowball.setCollisionCategory(3); // this is a bitmask
+
   warning = game.add.image(0, 0, 'warning');
-  whiskey.visible = false;
-  shrooms.visible = false;
-  weed.visible = false;
+
+  bonus.visible = false;
   snowball.visible = false;
   warning.visible = false;
 
@@ -62,7 +70,7 @@ function gameCreate() {
   johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
   johnLegs.setPolygon(lowerJohnVertices);
   lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
-  lowerjohn.visible = true;
+  lowerjohn.visible = false;
   lowerjohn.anchor.setTo(0.6, 0.5);
   lowerjohn.body = johnLegs;
   johnLegs.sprite = lowerjohn;
@@ -71,7 +79,7 @@ function gameCreate() {
   johnBody.setPolygon(upperJohnVertices);
   upperjohn = game.add.sprite(0, 0, 'upperjohn');
   johnBody.sprite = upperjohn;
-  upperjohn.visible = true;
+  upperjohn.visible = false;
   upperjohn.anchor.setTo(0.5, 1.2);
   upperjohn.body = johnBody;
 
@@ -132,22 +140,21 @@ function gameCreate() {
   game.cursors = game.input.keyboard.createCursorKeys();
   game.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
-  levelCaption = game.add.text(5, 5, 'Level: ' + level, {
+  levelText = game.add.text(5, 5, 'Level: ' + level, {
     fill: '#ffffff',
     font: '14pt Arial',
   });
-  scoreCaption = game.add.text(500, 5, 'Score: ' + score, {
+  scoreText = game.add.text(350, 5, 'Score: ' + score, {
     fill: '#ffffff',
     font: '14pt Arial',
   });
-  livesCaption = game.add.text(900, 5, 'Lives: ' + lives, {
+  livesText = game.add.text(700, 5, 'Lives: ' + lives, {
     fill: '#ffffff',
     font: '14pt Arial',
   });
-  scoreCaption.fixedToCamera = true;
-  levelCaption.fixedToCamera = true;
-  livesCaption.fixedToCamera = true;
-  background.fixedToCamera = true;
+  scoreText.fixedToCamera = true;
+  levelText.fixedToCamera = true;
+  livesText.fixedToCamera = true;
   game.camera.follow(johnBody);
 
 }
@@ -235,13 +242,24 @@ function buildLevel() {
       // ground[tnm].objs[_l4]._x = _l2;
       // ground[tnm].objs[_l4]._y = _l1 + 10;
       // ground[tnm].objs[_l4].gotoAndStop(Math.floor(Math.random() * 8) + 1);
-      // _l5++;
+      // _l5++;'
       const bonusType = game.rnd.integerInRange(1, 4);
-      var powerup = powerups.create(_l2, _l1 + 220, 'powerups');
+      var powerup = new Phaser.Physics.Box2D.Body(
+        game,
+        null,
+        _l2,
+        _l1 + 220,
+      );
+      powerup.setCircle(45);
+      var pw = game.add.sprite(_l2, _l1 + 220, 'powerups');
       powerup.frame = bonusType;
-      powerup.body.setCollisionCategory(2); // this is a bitmask
-      //powerup.body.sensor = true;
-      game.world.bringToTop(powerups);
+      powerup.sprite = pw;
+      pw.body = powerup;
+      powerup.value = powerupScores[bonusType];
+      pw.anchor.setTo(0.5, 0.5);
+      powerup.setCollisionCategory(2); // this is a bitmask
+      powerups.push(powerup);
+
     } // end if
     if (_l11 % 45 == 20) {
       //      _l4 = "drop" + bonusCount;
@@ -262,10 +280,17 @@ function buildLevel() {
   lastGet = 0;
 }
 
-function callPowerup(wheel, powerup) {
-  console.log(powerup);
-  powerup.visible = false;
-  powerup.destroy();
+function updateStats() {
+  levelText.setText('LEVEL: ' + level);
+  scoreText.setText('SCORE: ' + score);
+  livesText.setText('LIVES: ' + lives);
+}
+
+function callPowerup(body1, body2, fixture1, fixture2) {
+  score += body2.value;
+  if (body2.sprite != null)
+    body2.sprite.visible = false;
+  body2.destroy();
 }
 
 function update() {
@@ -273,6 +298,8 @@ function update() {
     mainMenuUpdate();
     return;
   }
+  updateStats();
+  background.x = game.camera.x * 0.5;
   lowerjohn.x = driveJoints[1].x;
   lowerjohn.y = driveJoints[1].y;
   let motorSpeed = 50; // rad/s
@@ -291,6 +318,7 @@ function update() {
     motorEnabled = false;
   } // roll if no keys pressed
   if (game.spaceKey.isDown) {
+    //restartLevel();
     isJumping = true;
     johnBody.velocity.y = -200;
   }
@@ -302,10 +330,15 @@ function update() {
 }
 
 function restartLevel() {
+  johnBody.angle = 0;
   johnBody.x = 60;
-  johnBody.y = 200;
+  johnBody.y = 180;
   johnBody.velocity.x = 0;
   johnBody.velocity.y = 0;
+  johnLegs.x = 60;
+  johnLegs.y = 200;
+  johnLegs.velocity.x = 0;
+  johnLegs.velocity.y = 0;
   motorSpeed = 0;
   isJumping = true;
 }
