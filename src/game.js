@@ -36,7 +36,7 @@ function gameCreate() {
   );
 
   snowball.setCircle(39);
-  var sb = game.add.sprite(0, 0, 'snowball');
+  var sb = game.add.sprite(-50, -50, 'snowball');
   snowball.sprite = sb;
   sb.body = snowball;
   sb.anchor.setTo(0.5, 0.5);
@@ -45,7 +45,7 @@ function gameCreate() {
   warning = game.add.image(0, 0, 'warning');
 
   bonus.visible = false;
-  snowball.visible = false;
+  //snowball.visible = false;
   warning.visible = false;
 
   buildLevel();
@@ -65,25 +65,7 @@ function gameCreate() {
     graphics.endFill();
   }
 
-
-  // Make the john body
-  johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
-  johnLegs.setPolygon(lowerJohnVertices);
-  lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
-  lowerjohn.visible = false;
-  lowerjohn.anchor.setTo(0.6, 0.5);
-  lowerjohn.body = johnLegs;
-  johnLegs.sprite = lowerjohn;
-
-  johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
-  johnBody.setPolygon(upperJohnVertices);
-  upperjohn = game.add.sprite(0, 0, 'upperjohn');
-  johnBody.sprite = upperjohn;
-  upperjohn.visible = false;
-  upperjohn.anchor.setTo(0.5, 1.2);
-  upperjohn.body = johnBody;
-
-  game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 3, 0.5);
+  spawnJohn();
   // Make wheel joints
   // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled
   // Make the wheel bodies
@@ -166,9 +148,9 @@ function groundCallback() {
 function buildLevel() {
   let tnum = 0;
   let _l9 = 250;
-  let _l2 = -200;
+  let x = -200;
   let _l8 = 0;
-  let _l1 = _l9 - 220;
+  let y = _l9 - 220;
   let _l7 = 0;
   let _l6 = 0;
   let _l5 = 0;
@@ -176,82 +158,82 @@ function buildLevel() {
   // tnm = "ter" + tnum;
   // ground.createEmptyMovieClip(tnm, tnum);
   // ground[tnm].clear();
-  // ground[tnm].moveTo(_l2, _l9);
+  // ground[tnm].moveTo(x, _l9);
   // ground[tnm].beginFill(14540287);
   // ground[tnm].createEmptyMovieClip("objs", 1);
-  // ground[tnm]._x = 15500 * tnum;
+  // ground[tnm].x = 15500 * tnum;
   // markerMC._rotation = bonusMC._rotation = ground._rotation = terrainang;
   let _l11 = 0;
-  while (_l2 < worldWidth) {
+  while (x < worldWidth) {
     let _l3 = Math.floor(Math.random() * 100) + 50;
     if (_l6 > 0) {
       _l6--;
     } // end if
-    _l12 = Math.cos(_l2 / 1000) * 20 + 25;
+    _l12 = Math.cos(x / 1000) * 20 + 25;
     if (_l6 > 0) {
       _l3 = _l3 + 110;
     } // end if
-    if (Math.random() < level * 0.033 && _l7 == 0 && _l2 > 700 && _l6 == 0) {
+    if (Math.random() < level * 0.033 && _l7 == 0 && x > 700 && _l6 == 0) {
       // let _l4 = "bldr" + _l5;
       // ground[tnm].objs.attachMovie("trackObjects", _l4, _l5);
-      // ground[tnm].objs[_l4]._x = _l2;
-      // ground[tnm].objs[_l4]._y = _l1 + 10;
+      // ground[tnm].objs[_l4].x = x;
+      // ground[tnm].objs[_l4]._y =_y + 10;
       // ground[tnm].objs[_l4].gotoAndStop(10);
 
       _l5++;
       _l7 = Math.floor(Math.random() * 3) + 3;
       _l6 = _l7 + 5;
-      _l1 = ohei - 40;
+      y = ohei - 40;
       _l3 = _l3 - 300;
     } // end if
-    let _l10 = _l1;
-    _l1 = _l1 + Math.sin(_l8) * _l3;
+    let _l10 = y;
+    y += Math.sin(_l8) * _l3;
     _l8 = _l8 + (Math.random() * 1 - 0.5);
     if (_l7 > 0) {
-      _l1 = _l9 + 300;
+      y = _l9 + 300;
       _l7--;
-    } else if (_l1 < 0) {
-      _l1 = 0;
+    } else if (y < 0) {
+      y = 0;
       _l8 = 0.1;
-    } else if (_l1 > _l9 - 200) {
-      _l1 = _l9 - 200;
+    } else if (y > _l9 - 200) {
+      y = _l9 - 200;
       _l8 = -0.1;
     } // end if
     if (Math.floor(Math.random() * 10) > 5) {
-      _l2 = _l2 + _l3;
-      // ground[tnm].lineTo(_l2, _l1);
-      vertices.push(_l2);
-      vertices.push(_l1);
+      x = x + _l3;
+      // ground[tnm].lineTo(x, _l1);
+      vertices.push(x);
+      vertices.push(y);
     } else {
-      _l2 = _l2 + _l3;
-      //  ground[tnm].curveTo(_l2 - _l3 / 2, _l10, _l2, _l1);
-      vertices.push(_l2);
-      vertices.push(_l1);
+      x = x + _l3;
+      //  ground[tnm].curveTo(x - _l3 / 2, _l10, x, _l1);
+      vertices.push(x);
+      vertices.push(y);
     } // end if
-    // if (_l2 + ground[tnm]._x < 40000) {
-    //   flagh = _l1;
+    // if (x + ground[tnm].x < 40000) {
+    //   flagh = y;
     // } // end if
     if (
       Math.random() < level * 0.025 &&
       _l8 > -0.1 &&
-      _l2 > 500 &&
-      _l2 < 14000
+      x > 500 &&
+      x < 14000
     ) {
       // _l4 = "bldr" + _l5;
       // ground[tnm].objs.attachMovie("trackObjects", _l4, _l5);
-      // ground[tnm].objs[_l4]._x = _l2;
-      // ground[tnm].objs[_l4]._y = _l1 + 10;
+      // ground[tnm].objs[_l4].x = x;
+      // ground[tnm].objs[_l4]._y =_y + 10;
       // ground[tnm].objs[_l4].gotoAndStop(Math.floor(Math.random() * 8) + 1);
       // _l5++;'
       const bonusType = game.rnd.integerInRange(1, 4);
       var powerup = new Phaser.Physics.Box2D.Body(
         game,
         null,
-        _l2,
-        _l1 + 220,
+        x,
+        y + 220,
       );
       powerup.setCircle(45);
-      var pw = game.add.sprite(_l2, _l1 + 220, 'powerups');
+      var pw = game.add.sprite(x, y + 220, 'powerups');
       powerup.frame = bonusType;
       powerup.sprite = pw;
       pw.body = powerup;
@@ -265,15 +247,15 @@ function buildLevel() {
       //      _l4 = "drop" + bonusCount;
       // bonusMC.attachMovie("bonusDrop", _l4, bonusCount);
       // bonusMC[_l4].gotoAndStop(random(10) + 1);
-      // bonusMC[_l4]._x = _l2 + ground[tnm]._x;
-      // bonusMC[_l4]._y = _l1 + 2;
+      // bonusMC[_l4].x = x + ground[tnm].x;
+      // bonusMC[_l4]._y =_y + 2;
       // bonusMC[_l4]._rotation = -terrainang;
       bonusCount++;
     } // end if
     _l11++;
-    ohei = _l1;
+    ohei = y;
   } // end while
-  // ground[tnm].lineTo(_l2, _l9 + 400);
+  // ground[tnm].lineTo(x, _l9 + 400);
   // ground[tnm].lineTo(0, _l9 + 400);
   // ground[tnm].endFill();
   tnum++;
@@ -300,6 +282,14 @@ function update() {
   }
   updateStats();
   background.x = game.camera.x * 0.5;
+  background2.x = background.x + background.width;
+  // if (background.x + background.width < game.camera.x &
+  //   background.x != background2.x + background2.width) {
+  //   console.log('push first background');
+  //   background.x = background2.x + background2.width;
+  // } else if (background2.x + background2.width < game.camera.x) {
+  //   background2.x = background.x + background.width;
+  // }
   lowerjohn.x = driveJoints[1].x;
   lowerjohn.y = driveJoints[1].y;
   let motorSpeed = 50; // rad/s
@@ -330,17 +320,33 @@ function update() {
 }
 
 function restartLevel() {
-  johnBody.angle = 0;
-  johnBody.x = 60;
-  johnBody.y = 180;
-  johnBody.velocity.x = 0;
-  johnBody.velocity.y = 0;
-  johnLegs.x = 60;
-  johnLegs.y = 200;
-  johnLegs.velocity.x = 0;
-  johnLegs.velocity.y = 0;
-  motorSpeed = 0;
-  isJumping = true;
+  lowerjohn.destroy();
+  upperjohn.destroy();
+  johnLegs.destroy();
+  johnBody.destroy();
+  console.log('restart');
+  spawnJohn();
+}
+
+function spawnJohn() {
+  // Make the john body
+  johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
+  johnLegs.setPolygon(lowerJohnVertices);
+  lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
+  lowerjohn.visible = false;
+  lowerjohn.anchor.setTo(0.6, 0.5);
+  lowerjohn.body = johnLegs;
+  johnLegs.sprite = lowerjohn;
+
+  johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
+  johnBody.setPolygon(upperJohnVertices);
+  upperjohn = game.add.sprite(0, 0, 'upperjohn');
+  johnBody.sprite = upperjohn;
+  upperjohn.visible = false;
+  upperjohn.anchor.setTo(0.5, 1.2);
+  upperjohn.body = johnBody;
+
+  game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 3, 0.5);
 }
 
 function render() {

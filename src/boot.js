@@ -12,7 +12,7 @@ const worldHeight = 640;
 let isJumping = true;
 let bonusCount = 0;
 let vertices = [];
-let powerups=[];
+let powerups = [];
 let whiskey;
 let shrooms;
 let weed;
@@ -24,7 +24,8 @@ let motorTorque = 4;
 let rideHeight = 0.25;
 let rewards = [];
 const PTM = 70;
-
+let background;
+let background2;
 
 let wheelBodies = [];
 
@@ -47,10 +48,10 @@ const upperJohnVertices = [
 ]
 
 const powerupScores = {
-  1:100,
-  2:250,
-  3:500,
-  4:1000
+  1: 100,
+  2: 250,
+  3: 500,
+  4: 1000
 };
 
 let johnBody;

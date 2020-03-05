@@ -1,6 +1,9 @@
 function mainMenuCreate() {
   background = game.add.image(0, 0, 'background');
-  background.height = game.height;
+  background.height = game.height + 300;
+  background2 = game.add.image(0, 0, 'background');
+  background2.height = game.height + 300;
+  background2.x = background.x + background.width;
 
   title2 = game.add.image(game.world.centerX - 5, game.world.centerY + 5, 'title');
 
