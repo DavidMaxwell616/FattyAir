@@ -26,7 +26,7 @@ let rewards = [];
 const PTM = 70;
 let background;
 let background2;
-
+let backgroundAPosition = true;
 let wheelBodies = [];
 
 const lowerJohnVertices = [

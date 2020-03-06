@@ -281,15 +281,9 @@ function update() {
     return;
   }
   updateStats();
-  background.x = game.camera.x * 0.5;
-  background2.x = background.x + background.width;
-  // if (background.x + background.width < game.camera.x &
-  //   background.x != background2.x + background2.width) {
-  //   console.log('push first background');
-  //   background.x = background2.x + background2.width;
-  // } else if (background2.x + background2.width < game.camera.x) {
-  //   background2.x = background.x + background.width;
-  // }
+
+  scrollBackground();
+
   lowerjohn.x = driveJoints[1].x;
   lowerjohn.y = driveJoints[1].y;
   let motorSpeed = 50; // rad/s
@@ -317,6 +311,25 @@ function update() {
     driveJoints[i].EnableMotor(motorEnabled);
     driveJoints[i].SetMotorSpeed(motorSpeed);
   }
+}
+
+function scrollBackground() {
+  if (backgroundAPosition) {
+    background.x = game.camera.x * 0.5;
+    background2.x = background.x + background.width;
+  } else {
+    background2.x = game.camera.x * 0.5;
+    background.x = background2.x + background2.width;
+  }
+  if (backgroundAPosition && background2.x < game.camera.x) {
+    background.x = background2.x + background2.width;
+    backgroundAPosition = false;
+  }
+  if (!backgroundAPosition && background.x < game.camera.x) {
+    background2.x = background.x + background.width;
+    backgroundAPosition = true;
+  }
+
 }
 
 function restartLevel() {

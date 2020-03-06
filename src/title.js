@@ -9,7 +9,7 @@ function mainMenuCreate() {
 
   title2.anchor.setTo(0.5, 0.5);
   title2.visible = true;
-  title2.tint = Math.random() * 0xffffff;
+  title2.tint = Math.random() * 0x222222;
   title = game.add.image(game.world.centerX, game.world.centerY, 'title');
 
   title.anchor.setTo(0.5, 0.5);
