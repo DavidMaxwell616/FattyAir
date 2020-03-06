@@ -13,6 +13,9 @@ function preload() {
   game.load.spritesheet('powerups', 'assets/images/powerups.png', 91, 91);
   game.load.spritesheet('bonus', 'assets/images/bonus.png', 75, 100);
   game.load.image('warning', 'assets/images/warning.png');
+  game.load.image('start', 'assets/images/start.png');
+  game.load.image('finish', 'assets/images/finish.png');
+  game.load.image('control', 'assets/images/green-arrow.png');
 
   game.load.image('maxxdaddy', 'assets/images/maxxdaddy.gif');
 }

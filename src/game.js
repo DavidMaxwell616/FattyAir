@@ -27,33 +27,18 @@ function gameCreate() {
     0,
   );
   bonus = game.add.sprite(0, 0, 'bonus');
-  snowball = new Phaser.Physics.Box2D.Body(
-    game,
-    null,
-    0,
-    0,
-    0,
-  );
-
-  snowball.setCircle(39);
-  var sb = game.add.sprite(-50, -50, 'snowball');
-  snowball.sprite = sb;
-  sb.body = snowball;
-  sb.anchor.setTo(0.5, 0.5);
-  snowball.setCollisionCategory(3); // this is a bitmask
 
   warning = game.add.image(0, 0, 'warning');
 
   bonus.visible = false;
-  //snowball.visible = false;
   warning.visible = false;
+
 
   buildLevel();
 
   groundBody.setChain(vertices);
   let graphics = game.add.graphics(0, 0);
   game.physics.box2d.enable(groundBody, true);
-
   for (let index = 0; index < vertices.length - 2; index += 2) {
     graphics.beginFill(0xeeeeee);
     graphics.lineStyle(1, 0xeeeeee, 1);
@@ -65,21 +50,50 @@ function gameCreate() {
     graphics.endFill();
   }
 
-  spawnJohn();
+  start = game.add.image(200, 200, 'start');
+  start.anchor.setTo(.5);
+  finish = game.add.image(worldWidth - 200, 200, 'finish');
+
+  leftButton = game.add.button(100, 450, 'control', moveLeft, this);
+  leftButton.anchor.setTo(.5);
+  leftButton.angle = 180;
+  rightButton = game.add.button(250, 450, 'control', moveRight, this);
+  rightButton.anchor.setTo(.5);
+  upButton = game.add.button(700, 450, 'control', jump, this);
+  upButton.anchor.setTo(.5);
+  upButton.angle = 270;
+  // Make the john body
+  johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 280);
+  johnLegs.setPolygon(lowerJohnVertices);
+  lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
+  lowerjohn.visible = true;
+  lowerjohn.anchor.setTo(0.6, 0.5);
+  lowerjohn.body = johnLegs;
+  johnLegs.sprite = lowerjohn;
+
+  johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 280);
+  johnBody.setPolygon(upperJohnVertices);
+  upperjohn = game.add.sprite(0, 0, 'upperjohn');
+  johnBody.sprite = upperjohn;
+  upperjohn.visible = true;
+  upperjohn.anchor.setTo(0.5, 1.2);
+  upperjohn.body = johnBody;
+
+  game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 6, 0.5);
   // Make wheel joints
   // bodyA, bodyB, ax, ay, bx, by, axisX, axisY, frequency, damping, motorSpeed, motorTorque, motorEnabled
   // Make the wheel bodies
   wheelBodies[0] = new Phaser.Physics.Box2D.Body(
     game,
     null,
-    -1.3 * PTM,
-    0.6 * -PTM,
+    johnLegs.x,
+    johnLegs.y,
   );
   wheelBodies[1] = new Phaser.Physics.Box2D.Body(
     game,
     null,
-    1.15 * PTM,
-    0.6 * -PTM,
+    johnLegs.x,
+    johnLegs.y,
   );
   wheelBodies[0].setCircle(0.3 * PTM);
   wheelBodies[1].setCircle(0.3 * PTM);
@@ -137,6 +151,9 @@ function gameCreate() {
   scoreText.fixedToCamera = true;
   levelText.fixedToCamera = true;
   livesText.fixedToCamera = true;
+  leftButton.fixedToCamera = true;
+  rightButton.fixedToCamera = true;
+  upButton.fixedToCamera = true;
   game.camera.follow(johnBody);
 
 }
@@ -275,6 +292,39 @@ function callPowerup(body1, body2, fixture1, fixture2) {
   body2.destroy();
 }
 
+function moveLeft() {
+  motorSpeed *= -1;
+}
+
+function moveRight() {
+
+}
+
+function jump() {
+  //restartLevel();
+  isJumping = true;
+  johnBody.velocity.y = -200;
+
+}
+
+function launchSnowball() {
+  snowball = new Phaser.Physics.Box2D.Body(
+    game,
+    null,
+    0,
+    0,
+    0,
+  );
+
+  snowball.setCircle(39);
+  sb = game.add.sprite(0, 0, 'snowball');
+  snowball.sprite = sb;
+  sb.body = snowball;
+  sb.anchor.setTo(0.5, 0.5);
+  snowball.setCollisionCategory(3); // this is a bitmask
+  sb.body.velocity.x = 100;
+}
+
 function update() {
   if (!startGame) {
     mainMenuUpdate();
@@ -283,30 +333,35 @@ function update() {
   updateStats();
 
   scrollBackground();
-
+  var rnd = Math.random();
+  if (rnd < .005) {
+    launchSnowball();
+  }
   lowerjohn.x = driveJoints[1].x;
   lowerjohn.y = driveJoints[1].y;
-  let motorSpeed = 50; // rad/s
-  let motorEnabled = true;
+  motorSpeed = 50; // rad/s
+  motorEnabled = true;
+  if (johnBody.x > worldWidth - 100) {
+    level++;
+    restartLevel();
+  }
   if (johnBody.x < 50)
     johnBody.velocity.x = 0;
   if (johnBody.y > game.world.height) {
+    lives--;
     restartLevel();
   }
   if (game.cursors.down.isDown) {
     motorSpeed = 0;
   } // prioritize braking
   else if (game.cursors.left.isDown && !game.cursors.right.isDown) {
-    motorSpeed *= -1;
+    moveLeft();
   } else if (game.cursors.right.isDown && !game.cursors.left.isDown) {} else {
     motorEnabled = false;
   } // roll if no keys pressed
   if (game.spaceKey.isDown) {
-    //restartLevel();
-    isJumping = true;
-    johnBody.velocity.y = -200;
+    jump();
   }
-
   for (let i = 0; i < 2; i++) {
     driveJoints[i].EnableMotor(motorEnabled);
     driveJoints[i].SetMotorSpeed(motorSpeed);
@@ -333,39 +388,27 @@ function scrollBackground() {
 }
 
 function restartLevel() {
-  lowerjohn.destroy();
-  upperjohn.destroy();
-  johnLegs.destroy();
-  johnBody.destroy();
-  console.log('restart');
-  spawnJohn();
+  johnLegs.velocity.x = 0;
+  johnBody.velocity.x = 0;
+  johnLegs.velocity.y = 0;
+  johnBody.velocity.y = 0;
+
+  johnLegs.y = 280;
+  johnLegs.x = 60;
+  johnBody.y = 280;
+  johnBody.x = 60;
+  wheelBodies[0].y = 280;
+  wheelBodies[0].x = 60;
+  wheelBodies[1].y = 280;
+  wheelBodies[1].x = 60;
 }
 
-function spawnJohn() {
-  // Make the john body
-  johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
-  johnLegs.setPolygon(lowerJohnVertices);
-  lowerjohn = game.add.sprite(0, 0, 'lowerjohn');
-  lowerjohn.visible = false;
-  lowerjohn.anchor.setTo(0.6, 0.5);
-  lowerjohn.body = johnLegs;
-  johnLegs.sprite = lowerjohn;
 
-  johnBody = new Phaser.Physics.Box2D.Body(game, null, 60, 200);
-  johnBody.setPolygon(upperJohnVertices);
-  upperjohn = game.add.sprite(0, 0, 'upperjohn');
-  johnBody.sprite = upperjohn;
-  upperjohn.visible = false;
-  upperjohn.anchor.setTo(0.5, 1.2);
-  upperjohn.body = johnBody;
-
-  game.physics.box2d.weldJoint(upperjohn, lowerjohn, 15, 30, 10, 20, 3, 0.5);
-}
 
 function render() {
   if (!startGame) {
     mainMenuUpdate();
     return;
   }
-  game.debug.box2dWorld();
+  // game.debug.box2dWorld();
 }

@@ -58,3 +58,11 @@ let johnBody;
 let johnLegs;
 let driveJoints = [];
 let upperjohn;
+let start;
+let finish;
+let upButton;
+let leftButton;
+let rightButton;
+let motorSpeed = 50; // rad/s
+let motorEnabled = true;
+let sb;
