@@ -18,6 +18,19 @@ function gameCreate() {
   game.physics.box2d.gravity.y = 500;
   game.physics.box2d.friction = 0.8;
 
+  snowball = new Phaser.Physics.Box2D.Body(
+    game,
+    null,
+    0,
+    0,
+  );
+  snowball.setCircle(39);
+  sb = game.add.sprite(0, 100, 'snowball');
+  snowball.sprite = sb;
+  sb.body = snowball;
+  sb.anchor.setTo(0.5, 0.5);
+  snowball.setCollisionCategory(3); // this is a bitmask
+
   // Make the ground body
   groundBody = new Phaser.Physics.Box2D.Body(
     game,
@@ -30,6 +43,7 @@ function gameCreate() {
 
   warning = game.add.image(0, 0, 'warning');
 
+  snowball.visible = false;
   bonus.visible = false;
   warning.visible = false;
 
@@ -54,12 +68,15 @@ function gameCreate() {
   start.anchor.setTo(.5);
   finish = game.add.image(worldWidth - 200, 200, 'finish');
 
-  leftButton = game.add.button(100, 450, 'control', moveLeft, this);
+  leftButton = game.add.button(100, game.height - 40, 'control', moveLeft, this);
   leftButton.anchor.setTo(.5);
+  leftButton.scale.setTo(.5);
   leftButton.angle = 180;
-  rightButton = game.add.button(250, 450, 'control', moveRight, this);
+  rightButton = game.add.button(250, game.height - 40, 'control', moveRight, this);
+  rightButton.scale.setTo(.5);
   rightButton.anchor.setTo(.5);
-  upButton = game.add.button(700, 450, 'control', jump, this);
+  upButton = game.add.button(700, game.height - 40, 'control', jump, this);
+  upButton.scale.setTo(.5);
   upButton.anchor.setTo(.5);
   upButton.angle = 270;
   // Make the john body
@@ -300,29 +317,17 @@ function moveRight() {
 
 }
 
+function launchSnowball() {
+  snowball.x = game.camera.x;
+  snowball.y = 0;
+  snowball.velocity.x = 500;
+}
+
 function jump() {
   //restartLevel();
   isJumping = true;
   johnBody.velocity.y = -200;
 
-}
-
-function launchSnowball() {
-  snowball = new Phaser.Physics.Box2D.Body(
-    game,
-    null,
-    0,
-    0,
-    0,
-  );
-
-  snowball.setCircle(39);
-  sb = game.add.sprite(0, 0, 'snowball');
-  snowball.sprite = sb;
-  sb.body = snowball;
-  sb.anchor.setTo(0.5, 0.5);
-  snowball.setCollisionCategory(3); // this is a bitmask
-  sb.body.velocity.x = 100;
 }
 
 function update() {
@@ -334,9 +339,23 @@ function update() {
 
   scrollBackground();
   var rnd = Math.random();
-  if (rnd < .005) {
+  if (rnd < .001 && !snowball.visible) {
+    snowball.visible = true;
     launchSnowball();
   }
+
+  if (snowball.visible) {
+    if (snowball.x > game.camera.width || snowball.y > game.camera.height)
+      snowball.visible = false;
+  }
+
+
+  if (snowball.body != null) {
+    snowball.body.velocity.x += 80;
+    if (snowball.x > game.camera.width - 50)
+      snowball.destroy();
+  }
+
   lowerjohn.x = driveJoints[1].x;
   lowerjohn.y = driveJoints[1].y;
   motorSpeed = 50; // rad/s
