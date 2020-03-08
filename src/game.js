@@ -418,5 +418,5 @@ function render() {
     mainMenuUpdate();
     return;
   }
-  game.debug.box2dWorld();
+  // game.debug.box2dWorld();
 }
