@@ -18,27 +18,17 @@ function gameCreate() {
   game.physics.box2d.gravity.y = 500;
   game.physics.box2d.friction = 0.8;
 
-  snowball = new Phaser.Physics.Box2D.Body(
-    game,
-    null,
-    0,
-    0,
-  );
+  snowball = new Phaser.Physics.Box2D.Body(game, null, 2000, 0);
   snowball.setCircle(39);
-  sb = game.add.sprite(0, 100, 'snowball');
+  sb = game.add.sprite(2000, 100, 'snowball');
   snowball.sprite = sb;
   sb.body = snowball;
   sb.anchor.setTo(0.5, 0.5);
+  sb.body.velocity.x = 1000;
   snowball.setCollisionCategory(3); // this is a bitmask
 
   // Make the ground body
-  groundBody = new Phaser.Physics.Box2D.Body(
-    game,
-    null,
-    0,
-    game.height / 2,
-    0,
-  );
+  groundBody = new Phaser.Physics.Box2D.Body(game, null, 0, game.height / 2, 0);
   bonus = game.add.sprite(0, 0, 'bonus');
 
   warning = game.add.image(0, 0, 'warning');
@@ -46,38 +36,38 @@ function gameCreate() {
   snowball.visible = false;
   bonus.visible = false;
   warning.visible = false;
-
+  graphics = game.add.graphics(0, 0);
 
   buildLevel();
 
-  groundBody.setChain(vertices);
-  let graphics = game.add.graphics(0, 0);
-  game.physics.box2d.enable(groundBody, true);
-  for (let index = 0; index < vertices.length - 2; index += 2) {
-    graphics.beginFill(0xeeeeee);
-    graphics.lineStyle(1, 0xeeeeee, 1);
-    graphics.moveTo(vertices[index], game.height / 2 + vertices[index + 1]);
-    graphics.lineTo(vertices[index], game.height + 100);
-    graphics.lineTo(vertices[index + 2], game.height + 100);
-    graphics.lineTo(vertices[index + 2], game.height / 2 + vertices[index + 3]);
-    graphics.lineTo(vertices[index], game.height / 2 + vertices[index + 1]);
-    graphics.endFill();
-  }
+  drawLevel();
 
   start = game.add.image(200, 200, 'start');
-  start.anchor.setTo(.5);
+  start.anchor.setTo(0.5);
   finish = game.add.image(worldWidth - 200, 200, 'finish');
 
-  leftButton = game.add.button(100, game.height - 40, 'control', moveLeft, this);
-  leftButton.anchor.setTo(.5);
-  leftButton.scale.setTo(.5);
+  leftButton = game.add.button(
+    100,
+    game.height - 40,
+    'control',
+    moveLeft,
+    this,
+  );
+  leftButton.anchor.setTo(0.5);
+  leftButton.scale.setTo(0.5);
   leftButton.angle = 180;
-  rightButton = game.add.button(250, game.height - 40, 'control', moveRight, this);
-  rightButton.scale.setTo(.5);
-  rightButton.anchor.setTo(.5);
+  rightButton = game.add.button(
+    250,
+    game.height - 40,
+    'control',
+    moveRight,
+    this,
+  );
+  rightButton.scale.setTo(0.5);
+  rightButton.anchor.setTo(0.5);
   upButton = game.add.button(700, game.height - 40, 'control', jump, this);
-  upButton.scale.setTo(.5);
-  upButton.anchor.setTo(.5);
+  upButton.scale.setTo(0.5);
+  upButton.anchor.setTo(0.5);
   upButton.angle = 270;
   // Make the john body
   johnLegs = new Phaser.Physics.Box2D.Body(game, null, 60, 280);
@@ -172,11 +162,27 @@ function gameCreate() {
   rightButton.fixedToCamera = true;
   upButton.fixedToCamera = true;
   game.camera.follow(johnBody);
-
 }
 
 function groundCallback() {
   isJumping = false;
+}
+
+function drawLevel() {
+  groundBody.setChain(vertices);
+  game.physics.box2d.enable(groundBody, true);
+  graphics.clear();
+  for (let index = 0; index < vertices.length - 2; index += 2) {
+    graphics.beginFill(0xeeeeee);
+    graphics.lineStyle(1, 0xeeeeee, 1);
+    graphics.moveTo(vertices[index], game.height / 2 + vertices[index + 1]);
+    graphics.lineTo(vertices[index], game.height + 100);
+    graphics.lineTo(vertices[index + 2], game.height + 100);
+    graphics.lineTo(vertices[index + 2], game.height / 2 + vertices[index + 3]);
+    graphics.lineTo(vertices[index], game.height / 2 + vertices[index + 1]);
+    graphics.endFill();
+  }
+
 }
 
 function buildLevel() {
@@ -247,43 +253,33 @@ function buildLevel() {
     // if (x + ground[tnm].x < 40000) {
     //   flagh = y;
     // } // end if
-    if (
-      Math.random() < level * 0.025 &&
-      _l8 > -0.1 &&
-      x > 500 &&
-      x < 14000
-    ) {
-      // _l4 = "bldr" + _l5;
-      // ground[tnm].objs.attachMovie("trackObjects", _l4, _l5);
-      // ground[tnm].objs[_l4].x = x;
-      // ground[tnm].objs[_l4]._y =_y + 10;
-      // ground[tnm].objs[_l4].gotoAndStop(Math.floor(Math.random() * 8) + 1);
-      // _l5++;'
+    if (Math.random() < level * 0.025 && _l8 > -0.1 && x > 500 && x < 14000) {
       const bonusType = game.rnd.integerInRange(1, 4);
-      var powerup = new Phaser.Physics.Box2D.Body(
-        game,
-        null,
-        x,
-        y + 220,
-      );
+      var powerup = new Phaser.Physics.Box2D.Body(game, null, x, y + 220);
       powerup.setCircle(45);
       var pw = game.add.sprite(x, y + 220, 'powerups');
       powerup.frame = bonusType;
       powerup.sprite = pw;
       pw.body = powerup;
+      pw.frame = bonusType;
       powerup.value = powerupScores[bonusType];
       pw.anchor.setTo(0.5, 0.5);
       powerup.setCollisionCategory(2); // this is a bitmask
       powerups.push(powerup);
-
     } // end if
     if (_l11 % 45 == 20) {
-      //      _l4 = "drop" + bonusCount;
-      // bonusMC.attachMovie("bonusDrop", _l4, bonusCount);
-      // bonusMC[_l4].gotoAndStop(random(10) + 1);
-      // bonusMC[_l4].x = x + ground[tnm].x;
-      // bonusMC[_l4]._y =_y + 2;
-      // bonusMC[_l4]._rotation = -terrainang;
+      const bonusType = game.rnd.integerInRange(1, 4);
+      var bonus = new Phaser.Physics.Box2D.Body(game, null, x, y + 220);
+      var bSprite = game.add.sprite(x, y + 220, 'bonus');
+      bonus.setRectangle(bSprite.width, bSprite.height);
+      bonus.frame = bonusType;
+      bonus.sprite = bSprite;
+      bSprite.body = powerup;
+      bSprite.frame = bonusType;
+      bonus.value = 1000;
+      bSprite.anchor.setTo(0.5, 0.5);
+      bonus.setCollisionCategory(2); // this is a bitmask
+      bonuses.push(bonus);
       bonusCount++;
     } // end if
     _l11++;
@@ -304,8 +300,7 @@ function updateStats() {
 
 function callPowerup(body1, body2, fixture1, fixture2) {
   score += body2.value;
-  if (body2.sprite != null)
-    body2.sprite.visible = false;
+  if (body2.sprite != null) body2.sprite.visible = false;
   body2.destroy();
 }
 
@@ -313,9 +308,7 @@ function moveLeft() {
   motorSpeed *= -1;
 }
 
-function moveRight() {
-
-}
+function moveRight() {}
 
 function launchSnowball() {
   snowball.x = game.camera.x;
@@ -327,7 +320,6 @@ function jump() {
   //restartLevel();
   isJumping = true;
   johnBody.velocity.y = -200;
-
 }
 
 function update() {
@@ -339,7 +331,7 @@ function update() {
 
   scrollBackground();
   var rnd = Math.random();
-  if (rnd < .001 && !snowball.visible) {
+  if (rnd < 0.001 && !snowball.visible) {
     snowball.visible = true;
     launchSnowball();
   }
@@ -349,11 +341,9 @@ function update() {
       snowball.visible = false;
   }
 
-
   if (snowball.body != null) {
-    snowball.body.velocity.x += 80;
-    if (snowball.x > game.camera.width - 50)
-      snowball.destroy();
+    snowball.body.velocity.x += 500;
+    if (snowball.x > game.camera.width - 50) snowball.destroy();
   }
 
   lowerjohn.x = driveJoints[1].x;
@@ -364,8 +354,7 @@ function update() {
     level++;
     restartLevel();
   }
-  if (johnBody.x < 50)
-    johnBody.velocity.x = 0;
+  if (johnBody.x < 50) johnBody.velocity.x = 0;
   if (johnBody.y > game.world.height) {
     lives--;
     restartLevel();
@@ -403,7 +392,6 @@ function scrollBackground() {
     background2.x = background.x + background.width;
     backgroundAPosition = true;
   }
-
 }
 
 function restartLevel() {
@@ -420,14 +408,15 @@ function restartLevel() {
   wheelBodies[0].x = 60;
   wheelBodies[1].y = 280;
   wheelBodies[1].x = 60;
+  vertices = [];
+  buildLevel();
+  drawLevel();
 }
-
-
 
 function render() {
   if (!startGame) {
     mainMenuUpdate();
     return;
   }
-  // game.debug.box2dWorld();
+  game.debug.box2dWorld();
 }

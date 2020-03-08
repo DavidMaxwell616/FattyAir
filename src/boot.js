@@ -66,3 +66,5 @@ let rightButton;
 let motorSpeed = 50; // rad/s
 let motorEnabled = true;
 let sb;
+let bonuses = [];
+let graphics;
