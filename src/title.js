@@ -16,16 +16,22 @@ function mainMenuCreate() {
   title.visible = true;
   maxxdaddy = game.add.image(0, game.height * 0.95, 'maxxdaddy');
 
-  //game.input.onDown.addOnce(startGame, this);
+   game.input.onDown.addOnce(fireStart, this);
   game.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }
 
 function mainMenuUpdate() {
   if (game.spaceKey.isDown) {
+  
+      fireStart();
+  }
+}
+
+function fireStart(){
     game.spaceKey = null;
     title.visible = false;
     title2.visible = false;
     gameCreate();
     startGame = true;
-  }
+
 }
