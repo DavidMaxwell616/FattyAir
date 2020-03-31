@@ -182,7 +182,6 @@ function drawLevel() {
     graphics.lineTo(vertices[index], game.height / 2 + vertices[index + 1]);
     graphics.endFill();
   }
-
 }
 
 function buildLevel() {
@@ -364,7 +363,8 @@ function update() {
   } // prioritize braking
   else if (game.cursors.left.isDown && !game.cursors.right.isDown) {
     moveLeft();
-  } else if (game.cursors.right.isDown && !game.cursors.left.isDown) {} else {
+  } else if (game.cursors.right.isDown && !game.cursors.left.isDown) {
+  } else {
     motorEnabled = false;
   } // roll if no keys pressed
   if (game.spaceKey.isDown) {

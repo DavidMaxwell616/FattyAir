@@ -1,3 +1,5 @@
+var text;
+
 function preload() {
   game.load.crossOrigin = 'anonymous';
   game.scale.pageAlignHorizontally = true;
@@ -18,4 +20,22 @@ function preload() {
   game.load.image('control', 'assets/images/green-arrow.png');
 
   game.load.image('maxxdaddy', 'assets/images/maxxdaddy.gif');
+
+  game.load.onLoadStart.add(loadStart, this);
+  game.load.onLoadComplete.add(loadComplete, this);
+  text = game.add.text(32, 32, '', {
+    fill: '#ffffff'
+  });
+}
+
+function loadStart() {
+
+  text.setText("Loading ...");
+
+}
+
+function loadComplete() {
+
+  text.setText("Load Complete");
+
 }
